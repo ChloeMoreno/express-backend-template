@@ -36,6 +36,16 @@ app.get('/favorites', (req, res)=> {
   })
 })
 
+app.get('/eliminated', (req, res)=> {
+  connection.query('SELECT * FROM queen WHERE is_eliminated = true',(err, result) => {
+    if (err) {
+      res.status(500).send('error retrieving data from database');
+    } else {
+      res.status(200).json(result)
+    }
+  })
+} )
+
 app.get('/queens/:id', (req,res)=> {
   const queenId = req.params.id;
   connection.query('SELECT * FROM queen WHERE id = ?',[queenId],
@@ -49,7 +59,18 @@ app.get('/queens/:id', (req,res)=> {
   })
 })
 
-
+app.get('/queens/:search', (req, res) => {
+  const queenName = req.params.search;
+  connection.query('SELECT * from queen WHERE dragname LIKE %?%', [queenName],
+  (err, result)=> {
+    if(err) {
+      res.status(500).send('error retrieving data from database');
+    } else {
+      if (result.length) res.json(result[0]);
+      else res.status(404).send('searched queen not found')
+    }
+  })
+})
 
 app.put('/queens/:id', (req, res) => {
   const queenId = req.params.id;
